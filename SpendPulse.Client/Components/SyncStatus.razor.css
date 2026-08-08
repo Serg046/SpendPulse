@@ -1,11 +1,19 @@
 .sync-status {
+    order: 2;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 0.25rem;
-    margin-top: auto;
     padding: 1rem;
+    background-color: #3a0647;
     color: rgba(255, 255, 255, 0.7);
+}
+
+@media (min-width: 641px) {
+    .sync-status {
+        order: initial;
+        margin-top: auto;
+    }
 }
 
 .sync-status__row {

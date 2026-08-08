@@ -42,7 +42,7 @@
 
     <button class="trends-toolbar__button" @onclick="OpenExclusionsModal">Excluded months (@_excludedMonths.Count)</button>
 
-    <button class="trends-toolbar__table-toggle" @onclick="() => _showTable = !_showTable">@(_showTable ? "Show chart" : "Show table")</button>
+    <button class="trends-toolbar__table-toggle trends-toolbar__table-toggle--desktop" @onclick="() => _showTable = !_showTable">@(_showTable ? "Show chart" : "Show table")</button>
 </div>
 
 @if (_showExclusionsModal)
@@ -168,6 +168,11 @@ else
             }
         </div>
     </div>
+}
+
+@if (!_loading)
+{
+    <button class="trends-toolbar__table-toggle trends-toolbar__table-toggle--mobile" @onclick="() => _showTable = !_showTable">@(_showTable ? "Show chart" : "Show table")</button>
 }
 
 @code {

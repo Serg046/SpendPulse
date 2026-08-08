@@ -1,12 +1,21 @@
+.nav-menu-root {
+    order: -2;
+    display: flex;
+    flex-direction: column;
+    background-image: linear-gradient(180deg, rgb(120, 170, 230) 0%, #3a0647 70%);
+}
+
 .navbar-toggler {
     appearance: none;
     cursor: pointer;
+    margin: 0;
     width: 3.5rem;
     height: 2.5rem;
     color: white;
-    position: absolute;
-    top: 0.5rem;
+    position: fixed;
+    top: 1rem;
     right: 1rem;
+    z-index: 1001;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.55%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") no-repeat center/1.75rem rgba(255, 255, 255, 0.1);
 }
@@ -16,11 +25,16 @@
 }
 
 .top-row {
-    min-height: 3.5rem;
-    background-color: rgba(0,0,0,0.4);
+    height: 4.5rem;
+    background-color: #3a0647;
     display: flex;
     align-items: center;
-    padding: 0.5rem 0 0.5rem 1rem;
+    padding-left: 1rem;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
 }
 
 .top-row__brand {
@@ -113,15 +127,49 @@
 
 .navbar-toggler:checked ~ .nav-scrollable {
     display: block;
+    position: fixed;
+    top: 4.5rem;
+    left: 0;
+    width: 100%;
+    max-height: calc(100vh - 4.5rem);
+    overflow-y: auto;
+    background-image: linear-gradient(180deg, rgb(120, 170, 230) 0%, #3a0647 70%);
+    z-index: 999;
 }
 
 @media (min-width: 641px) {
+    .nav-menu-root {
+        order: initial;
+        background-image: none;
+    }
+
     .navbar-toggler {
         display: none;
+    }
+
+    .top-row {
+        height: 3.5rem;
+        background-color: rgba(0, 0, 0, 0.4);
+        position: static;
+        top: auto;
+        left: auto;
+        width: auto;
+        z-index: auto;
     }
 
     .nav-scrollable {
         /* Never collapse the sidebar for wide screens */
         display: block;
+        background-image: none;
+    }
+
+    .navbar-toggler:checked ~ .nav-scrollable {
+        position: static;
+        top: auto;
+        left: auto;
+        width: auto;
+        max-height: none;
+        overflow: visible;
+        z-index: auto;
     }
 }

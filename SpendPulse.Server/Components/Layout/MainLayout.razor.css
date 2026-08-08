@@ -2,23 +2,22 @@
     position: relative;
     display: flex;
     flex-direction: column;
+    padding-top: 4.5rem;
 }
 
 main {
-    flex: 1;
-    min-width: 0;
+    display: contents;
 }
 
 .sidebar {
-    display: flex;
-    flex-direction: column;
-    background-image: linear-gradient(180deg, rgb(120, 170, 230) 0%, #3a0647 70%);
+    display: contents;
 }
 
 .top-row {
+    order: 1;
     background-color: #f7f7f7;
     border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
+    justify-content: center;
     height: 3.5rem;
     display: flex;
     align-items: center;
@@ -28,7 +27,7 @@ main {
 
     .top-row ::deep a {
         white-space: nowrap;
-        margin-left: 1.5rem;
+        margin-left: 0;
         text-decoration: none;
     }
 
@@ -39,7 +38,6 @@ main {
 article {
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 3.5rem);
     min-width: 0;
     overflow-x: hidden;
     padding-left: 1.5rem;
@@ -49,30 +47,47 @@ article {
 @media (min-width: 641px) {
     .page {
         flex-direction: row;
+        padding-top: 0;
+    }
+
+    main {
+        display: block;
+        flex: 1;
+        min-width: 0;
+        margin-left: 250px;
     }
 
     .sidebar {
+        display: flex;
+        flex-direction: column;
         width: 250px;
         height: 100vh;
         position: fixed;
         top: 0;
         left: 0;
         overflow: hidden;
-    }
-
-    main {
-        margin-left: 250px;
+        background-image: linear-gradient(180deg, rgb(120, 170, 230) 0%, #3a0647 70%);
     }
 
     .top-row {
+        order: initial;
+        justify-content: flex-end;
         position: sticky;
         top: 0;
         z-index: 1;
     }
 
+        .top-row ::deep a {
+            margin-left: 1.5rem;
+        }
+
     .top-row, article {
         padding-left: 2rem !important;
         padding-right: 1.5rem !important;
+    }
+
+    article {
+        height: calc(100vh - 3.5rem);
     }
 }
 

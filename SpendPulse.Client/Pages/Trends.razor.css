@@ -70,6 +70,25 @@
     background-color: #f3eaf7;
 }
 
+.trends-toolbar__table-toggle--desktop {
+    display: none;
+}
+
+.trends-toolbar__table-toggle--mobile {
+    display: inline-block;
+    margin: 1.25rem 0 0;
+}
+
+@media (min-width: 641px) {
+    .trends-toolbar__table-toggle--desktop {
+        display: inline-block;
+    }
+
+    .trends-toolbar__table-toggle--mobile {
+        display: none;
+    }
+}
+
 .trends-loading {
     color: #52514e;
 }
