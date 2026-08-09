@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using SpendPulse.Client.Models;
 
 namespace SpendPulse.Client.Repositories;
 
@@ -39,5 +40,10 @@ public class SyncStatusApiClient(HttpClient http) : ISyncStatusRepository
         var response = await http.PostAsync(url, null);
         var body = await response.Content.ReadAsStringAsync();
         return string.IsNullOrEmpty(body) ? null : JsonSerializer.Deserialize<string>(body);
+    }
+
+    public async Task<SyncHistoryPage> GetSyncHistory(int page, int pageSize)
+    {
+        return await http.GetFromJsonAsync<SyncHistoryPage>($"api/sync-status/history?page={page}&pageSize={pageSize}") ?? new SyncHistoryPage();
     }
 }

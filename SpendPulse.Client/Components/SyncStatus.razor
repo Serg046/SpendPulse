@@ -1,4 +1,5 @@
 @rendermode InteractiveWebAssembly
+@using SpendPulse.Client.Models
 @using SpendPulse.Client.Repositories
 @using SpendPulse.Client.Services
 @using Microsoft.AspNetCore.Components
@@ -31,9 +32,53 @@
                 <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/>
             </svg>
         </button>
-        <span class="sync-status__text">@LastDataUpdate?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+        <span class="sync-status__text sync-status__text--clickable" @onclick="OpenHistoryModal">@LastDataUpdate?.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
     </div>
 </div>
+
+@if (_showHistoryModal)
+{
+    <div class="modal-backdrop" @onclick="CloseHistoryModal">
+        <div class="modal-box" @onclick:stopPropagation="true">
+            <div class="modal-box__header">
+                <span>Sync history</span>
+                <button class="modal-box__close" @onclick="CloseHistoryModal" aria-label="Close">&times;</button>
+            </div>
+
+            @if (_loadingHistory)
+            {
+                <p class="sync-history__loading">Loading...</p>
+            }
+            else
+            {
+                <div class="sync-history__list">
+                    @foreach (var entry in _historyEntries)
+                    {
+                        <div class="sync-history__row @(entry.Success ? "" : "sync-history__row--failed")" @onclick="() => ToggleError(entry)">
+                            <span class="sync-history__time">@entry.StartedAt.ToLocalTime().ToString("dd.MM.yyyy HH:mm")</span>
+                            <span class="sync-history__status">@(entry.Success ? "Success" : "Failed")</span>
+                            <span class="sync-history__count">@(entry.Success ? $"+{entry.NewTransactionCount}" : "")</span>
+                        </div>
+                        @if (!entry.Success && !string.IsNullOrEmpty(entry.ErrorMessage) && ReferenceEquals(_expandedEntry, entry))
+                        {
+                            <div class="sync-history__error">@entry.ErrorMessage</div>
+                        }
+                    }
+                    @if (_historyEntries.Count == 0)
+                    {
+                        <span class="sync-history__empty">No syncs recorded yet.</span>
+                    }
+                </div>
+
+                <div class="sync-history__pager">
+                    <button class="sync-history__pager-btn" @onclick="PreviousHistoryPage" disabled="@(_historyPage == 0)" aria-label="Previous page">&#8249;</button>
+                    <span class="sync-history__pager-label">Page @(_historyPage + 1) of @TotalHistoryPages</span>
+                    <button class="sync-history__pager-btn" @onclick="NextHistoryPage" disabled="@(!HasNextHistoryPage)" aria-label="Next page">&#8250;</button>
+                </div>
+            }
+        </div>
+    </div>
+}
 
 @code {
     [PersistentState]
@@ -48,8 +93,19 @@
     [PersistentState]
     public bool IsTokenExpiringSoon { get; set; }
 
+    private const int HistoryPageSize = 10;
+
     private bool _isSyncing;
     private bool _isRefreshingToken;
+    private bool _showHistoryModal;
+    private bool _loadingHistory;
+    private int _historyPage;
+    private int _historyTotalCount;
+    private List<SyncHistoryEntry> _historyEntries = [];
+    private SyncHistoryEntry? _expandedEntry;
+
+    private int TotalHistoryPages => Math.Max(1, (int)Math.Ceiling(_historyTotalCount / (double)HistoryPageSize));
+    private bool HasNextHistoryPage => (_historyPage + 1) * HistoryPageSize < _historyTotalCount;
 
     protected override async Task OnInitializedAsync()
     {
@@ -150,5 +206,68 @@
             IsTokenExpiringSoon = false;
             await Sync();
         }
+    }
+
+    private async Task OpenHistoryModal()
+    {
+        _showHistoryModal = true;
+        _historyPage = 0;
+        await LoadHistoryPage();
+    }
+
+    private void CloseHistoryModal()
+    {
+        _showHistoryModal = false;
+    }
+
+    private async Task LoadHistoryPage()
+    {
+        _loadingHistory = true;
+        _expandedEntry = null;
+        StateHasChanged();
+
+        try
+        {
+            var page = await SyncStatusRepository.GetSyncHistory(_historyPage, HistoryPageSize);
+            _historyEntries = page.Entries;
+            _historyTotalCount = page.TotalCount;
+        }
+        finally
+        {
+            _loadingHistory = false;
+            StateHasChanged();
+        }
+    }
+
+    private void ToggleError(SyncHistoryEntry entry)
+    {
+        if (entry.Success)
+        {
+            return;
+        }
+
+        _expandedEntry = ReferenceEquals(_expandedEntry, entry) ? null : entry;
+    }
+
+    private async Task PreviousHistoryPage()
+    {
+        if (_historyPage == 0)
+        {
+            return;
+        }
+
+        _historyPage--;
+        await LoadHistoryPage();
+    }
+
+    private async Task NextHistoryPage()
+    {
+        if (!HasNextHistoryPage)
+        {
+            return;
+        }
+
+        _historyPage++;
+        await LoadHistoryPage();
     }
 }

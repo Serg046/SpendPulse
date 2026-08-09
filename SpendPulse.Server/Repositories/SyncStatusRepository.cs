@@ -1,9 +1,10 @@
+using SpendPulse.Client.Models;
 using SpendPulse.Client.Repositories;
 using SpendPulse.Server.Services;
 
 namespace SpendPulse.Server.Repositories;
 
-public class SyncStatusRepository(ISettingsRepository settingsRepository, SyncService syncService, IHttpContextAccessor httpContextAccessor, IConfiguration configuration) : ISyncStatusRepository
+public class SyncStatusRepository(ISettingsRepository settingsRepository, SyncService syncService, ISyncHistoryRepository syncHistoryRepository, IHttpContextAccessor httpContextAccessor, IConfiguration configuration) : ISyncStatusRepository
 {
     private const int TokenExpiryWarningDays = 3;
 
@@ -34,4 +35,6 @@ public class SyncStatusRepository(ISettingsRepository settingsRepository, SyncSe
     }
 
     public async Task<string?> RefreshToken(string? code = null) => await syncService.RefreshToken(code);
+
+    public async Task<SyncHistoryPage> GetSyncHistory(int page, int pageSize) => await syncHistoryRepository.GetPage(page, pageSize);
 }

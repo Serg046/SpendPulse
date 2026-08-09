@@ -1,3 +1,5 @@
+using SpendPulse.Client.Models;
+
 namespace SpendPulse.Client.Repositories;
 
 public interface ISyncStatusRepository
@@ -13,4 +15,6 @@ public interface ISyncStatusRepository
     Task<DateTime?> Sync();
 
     Task<string?> RefreshToken(string? code = null);
+
+    Task<SyncHistoryPage> GetSyncHistory(int page, int pageSize);
 }

@@ -7,7 +7,7 @@ using SpendPulse.Server.Repositories;
 
 namespace SpendPulse.Server.Services;
 
-public class SyncService(IConfiguration configuration, ISettingsRepository settingsRepository, TransactionRepository transactionRepository)
+public class SyncService(IConfiguration configuration, ISettingsRepository settingsRepository, TransactionRepository transactionRepository, ISyncHistoryRepository syncHistoryRepository)
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -16,40 +16,67 @@ public class SyncService(IConfiguration configuration, ISettingsRepository setti
 
     public async Task Sync()
     {
-        var settings = await settingsRepository.Get();
-        using var http = CreateHttpClient(settings.BankSession.ApplicationId);
+        var startedAt = DateTime.UtcNow;
+        var newTransactionCount = 0;
 
-        string? continuationKey = null;
-        var isFirstPage = true;
-        do
+        try
         {
-            var (transactions, nextContinuationKey) = await FetchPage(http, settings.BankSession.AccountId, continuationKey);
+            var settings = await settingsRepository.Get();
+            using var http = CreateHttpClient(settings.BankSession.ApplicationId);
 
-            if (isFirstPage)
+            string? continuationKey = null;
+            var isFirstPage = true;
+            do
             {
-                if (transactions.Any())
+                var (transactions, nextContinuationKey) = await FetchPage(http, settings.BankSession.AccountId, continuationKey);
+
+                if (isFirstPage)
                 {
-                    await transactionRepository.DeleteWithoutEntryReference();
+                    if (transactions.Any())
+                    {
+                        await transactionRepository.DeleteWithoutEntryReference();
+                    }
+
+                    isFirstPage = false;
                 }
 
-                isFirstPage = false;
-            }
+                var entryReferences = transactions
+                    .Where(t => t.EntryReference is not null)
+                    .Select(t => t.EntryReference!)
+                    .ToList();
+                var existingEntryReferences = await transactionRepository.GetExistingEntryReferences(entryReferences);
 
-            var entryReferences = transactions
-                .Where(t => t.EntryReference is not null)
-                .Select(t => t.EntryReference!)
-                .ToList();
-            var existingEntryReferences = await transactionRepository.GetExistingEntryReferences(entryReferences);
+                var newTransactions = transactions
+                    .Where(t => t.EntryReference is null || !existingEntryReferences.Contains(t.EntryReference))
+                    .ToList();
+                await transactionRepository.Save(newTransactions);
+                newTransactionCount += newTransactions.Count;
 
-            var newTransactions = transactions
-                .Where(t => t.EntryReference is null || !existingEntryReferences.Contains(t.EntryReference))
-                .ToList();
-            await transactionRepository.Save(newTransactions);
+                continuationKey = existingEntryReferences.Count == 0 ? nextContinuationKey : null;
+            } while (continuationKey is not null);
 
-            continuationKey = existingEntryReferences.Count == 0 ? nextContinuationKey : null;
-        } while (continuationKey is not null);
+            await settingsRepository.UpdateLastDataUpdate(DateTime.UtcNow);
 
-        await settingsRepository.UpdateLastDataUpdate(DateTime.UtcNow);
+            await syncHistoryRepository.Add(new SyncHistoryEntry
+            {
+                StartedAt = startedAt,
+                FinishedAt = DateTime.UtcNow,
+                Success = true,
+                NewTransactionCount = newTransactionCount
+            });
+        }
+        catch (Exception ex)
+        {
+            await syncHistoryRepository.Add(new SyncHistoryEntry
+            {
+                StartedAt = startedAt,
+                FinishedAt = DateTime.UtcNow,
+                Success = false,
+                NewTransactionCount = newTransactionCount,
+                ErrorMessage = ex.Message
+            });
+            throw;
+        }
     }
 
     public async Task<string?> RefreshToken(string? code = null)
