@@ -174,7 +174,7 @@
             return;
         }
 
-        Month = new DateOnly(DateTime.Today.Year, DateTime.Today.Month, 1);
+        Month = new DateOnly(AppTimeZone.Today.Year, AppTimeZone.Today.Month, 1);
         Mappings = await MerchantMappingRepository.GetAll();
         GroupAssignments = await MerchantGroupRepository.GetAssignments();
         GroupNames = await MerchantGroupRepository.GetGroups();

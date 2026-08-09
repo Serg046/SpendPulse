@@ -249,7 +249,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var today = DateOnly.FromDateTime(DateTime.Today);
+        var today = AppTimeZone.Today;
         _maxMonth = new DateOnly(today.Year, today.Month, 1).AddMonths(-1);
 
         if (FromMonth is not null && ToMonth is not null)
