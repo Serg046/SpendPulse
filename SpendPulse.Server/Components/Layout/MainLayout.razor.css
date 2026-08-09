@@ -2,7 +2,6 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    padding-top: 4.5rem;
 }
 
 main {
@@ -47,7 +46,6 @@ article {
 @media (min-width: 641px) {
     .page {
         flex-direction: row;
-        padding-top: 0;
     }
 
     main {
