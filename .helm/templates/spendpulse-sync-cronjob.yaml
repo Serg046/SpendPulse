@@ -1,0 +1,24 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: spendpulse-sync-cronjob
+spec:
+  schedule: "0 * * * *"
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: sync-trigger
+            image: curlimages/curl:8.11.1
+            command:
+            - sh
+            - -c
+            - curl -sf -u "$CRON_USERNAME:$CRON_PASSWORD" -X POST http://spendpulse-service/api/sync-status/sync
+            env:
+            - name: CRON_USERNAME
+              value: {{ .Values.cronUsername | quote }}
+            - name: CRON_PASSWORD
+              value: {{ .Values.cronPassword | quote }}

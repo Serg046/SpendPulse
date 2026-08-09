@@ -26,12 +26,27 @@ jobs:
       - name: Install werf
         uses: werf/actions/install@v2
 
+      - name: Extract an admin user's credentials from AUTH secret for cron auth
+        id: cron_creds
+        run: |
+          CRON_ADMIN_USERNAME=$(echo "$AUTH" | jq -r '[.[] | select(.IsAdmin==true)] | first | .Username')
+          CRON_ADMIN_PASSWORD=$(echo "$AUTH" | jq -r '[.[] | select(.IsAdmin==true)] | first | .Password')
+          echo "::add-mask::$CRON_ADMIN_PASSWORD"
+          echo "username=$CRON_ADMIN_USERNAME" >> "$GITHUB_OUTPUT"
+          echo "password=$CRON_ADMIN_PASSWORD" >> "$GITHUB_OUTPUT"
+        env:
+          AUTH: ${{ secrets.AUTH }}
+
       - name: Run werf converge
         run: |
           . $(werf ci-env github --as-file)
-          werf converge --platform linux/amd64 --verbose
+          werf converge --platform linux/amd64 --verbose \
+            --set cronUsername="$CRON_USERNAME" \
+            --set cronPassword="$CRON_PASSWORD"
         env:
           WERF_ENV: production
           GITHUB_TOKEN: ${{ github.token }}
           ENABLEBANKING_PRIVATE_KEY: ${{ secrets.ENABLEBANKING_PRIVATE_KEY }}
           AUTH: ${{ secrets.AUTH }}
+          CRON_USERNAME: ${{ steps.cron_creds.outputs.username }}
+          CRON_PASSWORD: ${{ steps.cron_creds.outputs.password }}

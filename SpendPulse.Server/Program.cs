@@ -6,6 +6,7 @@ using System.Text;
 using SpendPulse.Client.Models;
 using SpendPulse.Client.Repositories;
 using SpendPulse.Client.Services;
+using SpendPulse.Server.Authentication;
 using SpendPulse.Server.Components;
 using SpendPulse.Server.Models;
 using SpendPulse.Server.Repositories;
@@ -68,7 +69,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
             return Task.CompletedTask;
         };
-    });
+    })
+    .AddScheme<AuthenticationSchemeOptions, BasicAuthenticationHandler>("Basic", null);
 builder.Services.AddAuthorization(options =>
     options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
@@ -207,7 +209,11 @@ app.MapGet("/api/sync-status/history", async (int page, int pageSize, ISyncStatu
     await repo.GetSyncHistory(page, pageSize));
 app.MapPost("/api/sync-status/sync", async (ISyncStatusRepository repo) =>
     await repo.Sync())
-    .RequireAuthorization(new AuthorizeAttribute { Roles = "Admin" });
+    .RequireAuthorization(new AuthorizeAttribute
+    {
+        Roles = "Admin",
+        AuthenticationSchemes = $"{CookieAuthenticationDefaults.AuthenticationScheme},Basic"
+    });
 app.MapPost("/api/sync-status/refresh-token", async (string? code, ISyncStatusRepository repo) =>
     Results.Json(await repo.RefreshToken(code)))
     .RequireAuthorization(new AuthorizeAttribute { Roles = "Admin" });
