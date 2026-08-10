@@ -2,9 +2,16 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: spendpulse-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
 spec:
+  tls:
+  - hosts:
+    - spendpulse.is-local.org
+    secretName: spendpulse-tls
   rules:
-  - http:
+  - host: spendpulse.is-local.org
+    http:
       paths:
       - path: /
         pathType: Prefix
