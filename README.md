@@ -2,7 +2,7 @@
 
 ![SpendPulse](SpendPulse.png)
 
-A self-hosted personal spending-control app built on .NET 10 (Blazor Web App + MongoDB). It syncs transactions from your bank account via [EnableBanking](https://enablebanking.com), so it works with any bank EnableBanking supports (not just the one it was originally built against), as long as you configure it for your own bank and your own EnableBanking application.
+A self-hosted spending-control app built on .NET 10 (Blazor Web App + MongoDB). It syncs transactions from your bank account via [EnableBanking](https://enablebanking.com), so it works with any bank EnableBanking supports (not just the one it was originally built against), as long as you configure it for your own bank and your own EnableBanking application.
 
 ## Prerequisites
 
