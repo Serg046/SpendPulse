@@ -3,6 +3,8 @@ using SpendPulse.Client.Repositories;
 using SpendPulse.Client.Services;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
+CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
 CultureInfo.DefaultThreadCurrentUICulture = CultureInfo.InvariantCulture;
 
