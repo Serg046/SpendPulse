@@ -1,0 +1,110 @@
+.month-picker-field {
+    position: relative;
+    display: inline-block;
+}
+
+.month-picker-field__trigger {
+    padding: 0.35rem 0.6rem;
+    border: 1px solid #d6d5d5;
+    border-radius: 0.25rem;
+    background: #fff;
+    color: #3a0647;
+    font-size: 0.95rem;
+    cursor: pointer;
+    min-width: 9rem;
+    text-align: left;
+}
+
+.month-picker-field__trigger:hover {
+    border-color: #3a0647;
+}
+
+.month-picker-field__popover {
+    position: absolute;
+    top: calc(100% + 0.25rem);
+    left: 0;
+    z-index: 100;
+    width: 14rem;
+    background: #fff;
+    border: 1px solid #d6d5d5;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
+    padding: 0.75rem;
+}
+
+.month-picker-field__year-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.month-picker-field__year {
+    font-weight: 600;
+    color: #3a0647;
+    min-width: 3rem;
+    text-align: center;
+}
+
+.month-picker-field__year-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    border: 1px solid #d6d5d5;
+    background: #fff;
+    color: #3a0647;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.month-picker-field__year-nav:hover:not(:disabled) {
+    background-color: #f3eaf7;
+    border-color: #3a0647;
+}
+
+.month-picker-field__year-nav:active:not(:disabled) {
+    background-color: #e6d5ee;
+}
+
+.month-picker-field__year-nav:disabled {
+    color: #c8c7c2;
+    cursor: default;
+}
+
+.month-picker-field__grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.4rem;
+}
+
+.month-picker-field__month {
+    padding: 0.5rem 0;
+    border: 1px solid #d6d5d5;
+    border-radius: 0.25rem;
+    background: #fff;
+    color: #3a0647;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.month-picker-field__month:hover:not(:disabled) {
+    background-color: #f3eaf7;
+}
+
+.month-picker-field__month--selected {
+    background-color: #3a0647;
+    color: #fff;
+    border-color: #3a0647;
+}
+
+.month-picker-field__month:disabled {
+    color: #c8c7c2;
+    cursor: default;
+    background: #f7f7f7;
+}

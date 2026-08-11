@@ -3,6 +3,7 @@
 @using System.Globalization
 @using System.Net
 @using System.Text
+@using SpendPulse.Client.Components
 @using SpendPulse.Client.Models
 @using SpendPulse.Client.Repositories
 @using SpendPulse.Client.Services
@@ -12,13 +13,18 @@
 @inject ITrendMonthExclusionRepository TrendMonthExclusionRepository
 @inject ISyncStatusRepository SyncStatusRepository
 
+<!-- @onclick="CloseMonthPickers" here closes any open MonthPicker popover when you
+     click elsewhere on the page - see MonthPicker.razor's CloseIfOpen() for why this
+     has to be parent-mediated rather than each picker catching it internally. -->
+<div @onclick="CloseMonthPickers">
+
 @if (!_loading)
 {
 <div class="trends-toolbar">
     <div class="trends-toolbar__range">
-        <input type="month" class="trends-toolbar__month-input" value="@_fromMonth.ToString("yyyy-MM")" max="@_maxMonth.ToString("yyyy-MM")" @onchange="OnFromChanged"/>
+        <MonthPicker @ref="_fromMonthPicker" Value="_fromMonth" Max="_maxMonth" OnChange="OnFromMonthPicked"/>
         <span class="trends-toolbar__range-sep">to</span>
-        <input type="month" class="trends-toolbar__month-input" value="@_toMonth.ToString("yyyy-MM")" max="@_maxMonth.ToString("yyyy-MM")" @onchange="OnToChanged"/>
+        <MonthPicker @ref="_toMonthPicker" Value="_toMonth" Max="_maxMonth" OnChange="OnToMonthPicked"/>
     </div>
 
     <div class="trends-toolbar__mode">
@@ -51,7 +57,7 @@
 @if (_showExclusionsModal)
 {
     <div class="modal-backdrop" @onclick="CloseExclusionsModal">
-        <div class="modal-box" @onclick:stopPropagation="true">
+        <div class="modal-box" @onclick="CloseMonthPickers" @onclick:stopPropagation="true">
             <div class="modal-box__header">
                 <span>Excluded months</span>
                 <button class="modal-box__close" @onclick="CloseExclusionsModal" aria-label="Close">&times;</button>
@@ -77,7 +83,7 @@
             @if (_isAdmin)
             {
                 <div class="trends-exclusions__add-row">
-                    <input type="month" class="trends-exclusions__input" value="@_newExclusionMonth" @onchange="e => _newExclusionMonth = (string?)e.Value ?? string.Empty"/>
+                    <MonthPicker @ref="_exclusionMonthPicker" Value="_newExclusionMonth" OnChange="month => _newExclusionMonth = month"/>
                     <button class="trends-exclusions__add" @onclick="AddExclusion">Add</button>
                 </div>
             }
@@ -178,6 +184,8 @@ else
     <button class="trends-toolbar__table-toggle trends-toolbar__table-toggle--mobile" @onclick="() => _showTable = !_showTable">@(_showTable ? "Show chart" : "Show table")</button>
 }
 
+</div>
+
 @code {
     private enum ViewMode { Group, Merchant }
 
@@ -227,12 +235,15 @@ else
     private DateOnly _fromMonth;
     private DateOnly _toMonth;
     private DateOnly _maxMonth;
+    private MonthPicker? _fromMonthPicker;
+    private MonthPicker? _toMonthPicker;
+    private MonthPicker? _exclusionMonthPicker;
     private ViewMode _mode = ViewMode.Group;
     private bool _showTable;
     private bool _loading = true;
     private bool _isAdmin;
     private bool _showExclusionsModal;
-    private string _newExclusionMonth = string.Empty;
+    private DateOnly _newExclusionMonth;
     private List<DateOnly> _excludedMonths = [];
     private List<string> _allMerchantNames = [];
     private List<MonthlySpend> _extraMerchantSpends = [];
@@ -296,25 +307,32 @@ else
         await LoadSpend();
     }
 
+    private void CloseMonthPickers()
+    {
+        _fromMonthPicker?.CloseIfOpen();
+        _toMonthPicker?.CloseIfOpen();
+        _exclusionMonthPicker?.CloseIfOpen();
+    }
+
     private void OpenExclusionsModal()
     {
         _showExclusionsModal = true;
+        _newExclusionMonth = new DateOnly(AppTimeZone.Today.Year, AppTimeZone.Today.Month, 1);
     }
 
     private void CloseExclusionsModal()
     {
         _showExclusionsModal = false;
-        _newExclusionMonth = string.Empty;
     }
 
     private async Task AddExclusion()
     {
-        if (!_isAdmin || !DateOnly.TryParseExact(_newExclusionMonth, "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed))
+        if (!_isAdmin)
         {
             return;
         }
 
-        var month = new DateOnly(parsed.Year, parsed.Month, 1);
+        var month = _newExclusionMonth;
         if (_excludedMonths.Contains(month))
         {
             return;
@@ -322,7 +340,6 @@ else
 
         await TrendMonthExclusionRepository.Add(month);
         _excludedMonths.Add(month);
-        _newExclusionMonth = string.Empty;
         Recompute();
     }
 
@@ -393,26 +410,18 @@ else
         }
     }
 
-    private async Task OnFromChanged(ChangeEventArgs e)
+    private async Task OnFromMonthPicked(DateOnly month)
     {
-        if (DateOnly.TryParseExact((string?)e.Value, "yyyy-MM", CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsed))
-        {
-            var month = new DateOnly(parsed.Year, parsed.Month, 1);
-            _fromMonth = month > _maxMonth ? _maxMonth : month;
-            FromMonth = _fromMonth;
-            await LoadSpend();
-        }
+        _fromMonth = month > _maxMonth ? _maxMonth : month;
+        FromMonth = _fromMonth;
+        await LoadSpend();
     }
 
-    private async Task OnToChanged(ChangeEventArgs e)
+    private async Task OnToMonthPicked(DateOnly month)
     {
-        if (DateOnly.TryParseExact((string?)e.Value, "yyyy-MM", CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsed))
-        {
-            var month = new DateOnly(parsed.Year, parsed.Month, 1);
-            _toMonth = month > _maxMonth ? _maxMonth : month;
-            ToMonth = _toMonth;
-            await LoadSpend();
-        }
+        _toMonth = month > _maxMonth ? _maxMonth : month;
+        ToMonth = _toMonth;
+        await LoadSpend();
     }
 
     private async Task SetMode(ViewMode mode)

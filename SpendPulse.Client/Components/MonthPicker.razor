@@ -1,0 +1,107 @@
+@using System.Globalization
+
+<div class="month-picker-field" @onclick="Close">
+    <button type="button" class="month-picker-field__trigger" @onclick="Toggle" @onclick:stopPropagation="true">
+        @Value.ToString("MMMM yyyy", CultureInfo.InvariantCulture)
+    </button>
+
+    @if (_isOpen)
+    {
+        <div class="month-picker-field__popover" @onclick:stopPropagation="true">
+            <div class="month-picker-field__year-row">
+                <button type="button" class="month-picker-field__year-nav" @onclick="PreviousYear" disabled="@(!CanGoToPreviousYear)" aria-label="Previous year">&#8249;</button>
+                <span class="month-picker-field__year">@_displayedYear</span>
+                <button type="button" class="month-picker-field__year-nav" @onclick="NextYear" disabled="@(!CanGoToNextYear)" aria-label="Next year">&#8250;</button>
+            </div>
+            <div class="month-picker-field__grid">
+                @for (var m = 1; m <= 12; m++)
+                {
+                    var candidate = new DateOnly(_displayedYear, m, 1);
+                    var isDisabled = (Min is not null && candidate < Min) || (Max is not null && candidate > Max);
+                    <button type="button"
+                            class="month-picker-field__month @(candidate == Value ? "month-picker-field__month--selected" : "")"
+                            disabled="@isDisabled"
+                            @onclick="() => Pick(candidate)">
+                        @candidate.ToString("MMM", CultureInfo.InvariantCulture)
+                    </button>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public DateOnly Value { get; set; }
+
+    [Parameter]
+    public DateOnly? Min { get; set; }
+
+    [Parameter]
+    public DateOnly? Max { get; set; }
+
+    [Parameter]
+    public EventCallback<DateOnly> OnChange { get; set; }
+
+    private bool _isOpen;
+    private int _displayedYear;
+
+    protected override void OnParametersSet()
+    {
+        if (!_isOpen)
+        {
+            _displayedYear = Value.Year;
+        }
+    }
+
+    private bool CanGoToPreviousYear => Min is null || _displayedYear > Min.Value.Year;
+    private bool CanGoToNextYear => Max is null || _displayedYear < Max.Value.Year;
+
+    private void Toggle()
+    {
+        _isOpen = !_isOpen;
+        if (_isOpen)
+        {
+            _displayedYear = Value.Year;
+        }
+    }
+
+    private void Close()
+    {
+        _isOpen = false;
+    }
+
+    // Called by the parent page's own click-outside wrapper (see Trends.razor),
+    // since a click elsewhere on the page never bubbles through this component's
+    // own DOM subtree, so our internal @onclick="Close" above can't catch it alone.
+    public void CloseIfOpen()
+    {
+        if (_isOpen)
+        {
+            _isOpen = false;
+            StateHasChanged();
+        }
+    }
+
+    private void PreviousYear()
+    {
+        if (CanGoToPreviousYear)
+        {
+            _displayedYear--;
+        }
+    }
+
+    private void NextYear()
+    {
+        if (CanGoToNextYear)
+        {
+            _displayedYear++;
+        }
+    }
+
+    private async Task Pick(DateOnly month)
+    {
+        _isOpen = false;
+        await OnChange.InvokeAsync(month);
+    }
+}
