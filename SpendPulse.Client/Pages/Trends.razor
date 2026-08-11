@@ -12,6 +12,8 @@
 @inject ITrendMonthExclusionRepository TrendMonthExclusionRepository
 @inject ISyncStatusRepository SyncStatusRepository
 
+@if (!_loading)
+{
 <div class="trends-toolbar">
     <div class="trends-toolbar__range">
         <input type="month" class="trends-toolbar__month-input" value="@_fromMonth.ToString("yyyy-MM")" max="@_maxMonth.ToString("yyyy-MM")" @onchange="OnFromChanged"/>
@@ -44,6 +46,7 @@
 
     <button class="trends-toolbar__table-toggle trends-toolbar__table-toggle--desktop" @onclick="() => _showTable = !_showTable">@(_showTable ? "Show chart" : "Show table")</button>
 </div>
+}
 
 @if (_showExclusionsModal)
 {
