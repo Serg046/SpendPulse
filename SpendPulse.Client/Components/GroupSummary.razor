@@ -1,5 +1,6 @@
 @using System.Globalization
 @using SpendPulse.Client.Models
+@using SpendPulse.Client.Repositories
 @using SpendPulse.Client.Services
 
 <div class="group-summary">
@@ -37,8 +38,10 @@
     private IEnumerable<(string Name, decimal Total, string Currency)> GetGroupTotals()
     {
         return (Transactions ?? [])
-            .Where(t => t.Creditor?.Name is not null && !(t.CreditDebitIndicator == "CRDT" && t.EntryReference is not null))
-            .GroupBy(t => MerchantResolution.ResolveGroupName(t.Creditor!.Name!, Mappings, GroupAssignments))
+            .Where(t => !(t.CreditDebitIndicator == "CRDT" && t.EntryReference is not null))
+            .GroupBy(t => t.Creditor?.Name is not null
+                ? MerchantResolution.ResolveGroupName(t.Creditor.Name, Mappings, GroupAssignments)
+                : IMerchantGroupRepository.OthersGroupName)
             .Select(g => (
                 Name: g.Key,
                 Total: g.Sum(t => decimal.Parse(t.TransactionAmount.Value, CultureInfo.InvariantCulture)),

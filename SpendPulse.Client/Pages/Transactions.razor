@@ -226,8 +226,8 @@
 
         if (t.Creditor?.Name is null)
         {
-            SelectedMerchant = null;
-            SelectedGroup = null;
+            SelectedMerchant = IMerchantGroupRepository.OthersGroupName;
+            SelectedGroup = IMerchantGroupRepository.OthersGroupName;
             return;
         }
 
@@ -247,7 +247,7 @@
 
         if (t.Creditor?.Name is null)
         {
-            return false;
+            return SelectedGroup == IMerchantGroupRepository.OthersGroupName || SelectedMerchant == IMerchantGroupRepository.OthersGroupName;
         }
 
         if (SelectedGroup is not null)

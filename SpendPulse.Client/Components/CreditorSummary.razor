@@ -1,5 +1,6 @@
 @using System.Globalization
 @using SpendPulse.Client.Models
+@using SpendPulse.Client.Repositories
 @using SpendPulse.Client.Services
 
 <div class="creditor-summary">
@@ -34,8 +35,10 @@
     private IEnumerable<(string Name, decimal Total, string Currency)> GetCreditorTotals()
     {
         return (Transactions ?? [])
-            .Where(t => t.Creditor?.Name is not null && !(t.CreditDebitIndicator == "CRDT" && t.EntryReference is not null))
-            .GroupBy(t => MerchantResolution.ResolveCanonicalName(t.Creditor!.Name!, Mappings))
+            .Where(t => !(t.CreditDebitIndicator == "CRDT" && t.EntryReference is not null))
+            .GroupBy(t => t.Creditor?.Name is not null
+                ? MerchantResolution.ResolveCanonicalName(t.Creditor.Name, Mappings)
+                : IMerchantGroupRepository.OthersGroupName)
             .Select(g => (
                 Name: g.Key,
                 Total: g.Sum(t => decimal.Parse(t.TransactionAmount.Value, CultureInfo.InvariantCulture)),
