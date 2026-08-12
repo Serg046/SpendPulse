@@ -2,6 +2,14 @@
 @implements IAsyncDisposable
 @inject IJSRuntime JS
 
+@if (_isReloading)
+{
+    <div class="stale-session-overlay">
+        <div class="stale-session-overlay__spinner"></div>
+        <span>Refreshing…</span>
+    </div>
+}
+
 @code {
     private static readonly TimeSpan StaleAfter = TimeSpan.FromMinutes(5);
 
@@ -12,14 +20,18 @@
             });
         }
 
-        export function reloadPage() {
-            location.reload();
+        export function reloadAfterPaint() {
+            // Double rAF guarantees the overlay has actually been painted
+            // before we navigate away, so the reload reads as intentional
+            // instead of a jarring flash of the old content.
+            requestAnimationFrame(() => requestAnimationFrame(() => location.reload()));
         }
         """;
 
     private IJSObjectReference? _module;
     private DotNetObjectReference<StaleSessionWatcher>? _selfReference;
     private DateTime? _hiddenAt;
+    private bool _isReloading;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -53,7 +65,10 @@
 
         if (hiddenFor >= StaleAfter && _module is not null)
         {
-            await _module.InvokeVoidAsync("reloadPage");
+            _isReloading = true;
+            StateHasChanged();
+            await Task.Yield();
+            await _module.InvokeVoidAsync("reloadAfterPaint");
         }
     }
 
