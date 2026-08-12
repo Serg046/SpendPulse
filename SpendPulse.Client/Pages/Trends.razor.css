@@ -60,8 +60,10 @@
     cursor: pointer;
 }
 
-.trends-toolbar__table-toggle:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .trends-toolbar__table-toggle:hover {
+        background-color: #f3eaf7;
+    }
 }
 
 .trends-toolbar__table-toggle--desktop {
@@ -146,8 +148,10 @@
     transition: fill 0.15s ease;
 }
 
-.trends-chart__marker:hover {
-    r: 5;
+@media (hover: hover) {
+    .trends-chart__marker:hover {
+        r: 5;
+    }
 }
 
 .trends-chart__tooltip {
@@ -187,8 +191,10 @@
     border-radius: 0.25rem;
 }
 
-.trends-chart__legend-item:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .trends-chart__legend-item:hover {
+        background-color: #f3eaf7;
+    }
 }
 
 .trends-chart__legend-item--selected {
@@ -234,8 +240,10 @@
     font-weight: 600;
 }
 
-.trends-table tbody tr:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .trends-table tbody tr:hover {
+        background-color: #f3eaf7;
+    }
 }
 
 .trends-table__total {
@@ -265,8 +273,10 @@
     cursor: pointer;
 }
 
-.trends-toolbar__merchant-add:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .trends-toolbar__merchant-add:hover {
+        background-color: #f3eaf7;
+    }
 }
 
 .trends-toolbar__button {
@@ -278,8 +288,10 @@
     cursor: pointer;
 }
 
-.trends-toolbar__button:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .trends-toolbar__button:hover {
+        background-color: #f3eaf7;
+    }
 }
 
 .trends-exclusions__chips {
@@ -332,8 +344,10 @@
     cursor: pointer;
 }
 
-.trends-exclusions__add:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .trends-exclusions__add:hover {
+        background-color: #f3eaf7;
+    }
 }
 
 .modal-backdrop {

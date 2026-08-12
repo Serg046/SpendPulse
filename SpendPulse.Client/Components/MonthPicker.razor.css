@@ -15,8 +15,10 @@
     text-align: left;
 }
 
-.month-picker-field__trigger:hover {
-    border-color: #3a0647;
+@media (hover: hover) {
+    .month-picker-field__trigger:hover {
+        border-color: #3a0647;
+    }
 }
 
 .month-picker-field__popover {
@@ -63,9 +65,11 @@
     transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.month-picker-field__year-nav:hover:not(:disabled) {
-    background-color: #f3eaf7;
-    border-color: #3a0647;
+@media (hover: hover) {
+    .month-picker-field__year-nav:hover:not(:disabled) {
+        background-color: #f3eaf7;
+        border-color: #3a0647;
+    }
 }
 
 .month-picker-field__year-nav:active:not(:disabled) {
@@ -93,8 +97,10 @@
     cursor: pointer;
 }
 
-.month-picker-field__month:hover:not(:disabled) {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .month-picker-field__month:hover:not(:disabled) {
+        background-color: #f3eaf7;
+    }
 }
 
 .month-picker-field__month--selected {

@@ -52,8 +52,10 @@
     cursor: pointer;
 }
 
-.group-summary__item:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .group-summary__item:hover {
+        background-color: #f3eaf7;
+    }
 }
 
 .group-summary__item--selected {

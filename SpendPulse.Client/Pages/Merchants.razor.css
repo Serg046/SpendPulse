@@ -11,8 +11,10 @@
     cursor: pointer;
 }
 
-.merchants-toolbar__button:hover:not(:disabled) {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .merchants-toolbar__button:hover:not(:disabled) {
+        background-color: #f3eaf7;
+    }
 }
 
 .merchants-toolbar__button:disabled {
@@ -72,8 +74,10 @@
     cursor: pointer;
 }
 
-.merchants-exclusions__add:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .merchants-exclusions__add:hover {
+        background-color: #f3eaf7;
+    }
 }
 
 .merchants-list {
@@ -88,8 +92,10 @@
     cursor: pointer;
 }
 
-.merchants-list__item:hover:not(.merchants-list__item--readonly) {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .merchants-list__item:hover:not(.merchants-list__item--readonly) {
+        background-color: #f3eaf7;
+    }
 }
 
 .merchants-list__item--readonly {
@@ -193,8 +199,10 @@
     height: 1.4rem;
 }
 
-.merchants-modal__swap:hover {
-    color: #5a1070;
+@media (hover: hover) {
+    .merchants-modal__swap:hover {
+        color: #5a1070;
+    }
 }
 
 .merchants-modal__field {
@@ -252,8 +260,10 @@
     cursor: pointer;
 }
 
-.merchants-modal__similar-chip:hover {
-    background-color: #fff4e0;
+@media (hover: hover) {
+    .merchants-modal__similar-chip:hover {
+        background-color: #fff4e0;
+    }
 }
 
 .merchants-modal__search {
@@ -276,6 +286,8 @@
     cursor: pointer;
 }
 
-.merchants-modal__options li:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .merchants-modal__options li:hover {
+        background-color: #f3eaf7;
+    }
 }

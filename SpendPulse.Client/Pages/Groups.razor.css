@@ -98,8 +98,10 @@
     cursor: pointer;
 }
 
-.groups-board__column-title--editable:hover {
-    text-decoration: underline;
+@media (hover: hover) {
+    .groups-board__column-title--editable:hover {
+        text-decoration: underline;
+    }
 }
 
 .groups-board__rename-input {
@@ -191,6 +193,8 @@
     cursor: pointer;
 }
 
-.groups-board__add-button:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .groups-board__add-button:hover {
+        background-color: #f3eaf7;
+    }
 }

@@ -30,9 +30,11 @@ main {
         text-decoration: none;
     }
 
+@media (hover: hover) {
     .top-row ::deep a:hover {
         text-decoration: underline;
     }
+}
 
 article {
     display: flex;

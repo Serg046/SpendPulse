@@ -31,9 +31,11 @@
     transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.month-picker__nav:hover {
-    background-color: #f3eaf7;
-    border-color: #3a0647;
+@media (hover: hover) {
+    .month-picker__nav:hover {
+        background-color: #f3eaf7;
+        border-color: #3a0647;
+    }
 }
 
 .month-picker__nav:active {
@@ -110,8 +112,10 @@ table tbody tr {
     cursor: pointer;
 }
 
-table tbody tr:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    table tbody tr:hover {
+        background-color: #f3eaf7;
+    }
 }
 
 table tbody tr.row--highlighted {
@@ -140,9 +144,11 @@ table tbody tr.row--highlighted {
     cursor: pointer;
 }
 
-.transactions-table__action-button:hover {
-    background-color: rgba(58, 6, 71, 0.1);
-    color: #3a0647;
+@media (hover: hover) {
+    .transactions-table__action-button:hover {
+        background-color: rgba(58, 6, 71, 0.1);
+        color: #3a0647;
+    }
 }
 
 .transactions-table__action-icon {
@@ -175,8 +181,10 @@ table tbody tr.row--highlighted {
     cursor: pointer;
 }
 
-.transactions-table__menu-item:hover:not(:disabled) {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .transactions-table__menu-item:hover:not(:disabled) {
+        background-color: #f3eaf7;
+    }
 }
 
 .transactions-table__menu-item:disabled {
@@ -209,8 +217,10 @@ table tbody tr.row--highlighted {
     cursor: pointer;
 }
 
-.group-picker__options li:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .group-picker__options li:hover {
+        background-color: #f3eaf7;
+    }
 }
 
 .group-picker__option--current {
@@ -278,6 +288,8 @@ table tbody tr.row--highlighted {
     transition: background-color 0.15s ease;
 }
 
-.modal-box__copy:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .modal-box__copy:hover {
+        background-color: #f3eaf7;
+    }
 }

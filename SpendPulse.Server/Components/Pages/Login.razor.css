@@ -53,6 +53,8 @@
     cursor: pointer;
 }
 
-.login-card__submit:hover {
-    background: #4d0b5e;
+@media (hover: hover) {
+    .login-card__submit:hover {
+        background: #4d0b5e;
+    }
 }

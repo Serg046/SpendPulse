@@ -52,8 +52,10 @@
     cursor: pointer;
 }
 
-.creditor-summary__item:hover {
-    background-color: #f3eaf7;
+@media (hover: hover) {
+    .creditor-summary__item:hover {
+        background-color: #f3eaf7;
+    }
 }
 
 .creditor-summary__item--selected {
