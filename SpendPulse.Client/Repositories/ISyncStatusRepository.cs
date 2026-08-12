@@ -16,5 +16,5 @@ public interface ISyncStatusRepository
 
     Task<string?> RefreshToken(string? code = null);
 
-    Task<SyncHistoryPage> GetSyncHistory(int page, int pageSize);
+    Task<SyncLogPage> GetSyncLog(int page, int pageSize);
 }

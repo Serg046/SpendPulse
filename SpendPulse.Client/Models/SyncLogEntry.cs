@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace SpendPulse.Client.Models;
 
-public class SyncHistoryEntry
+public class SyncLogEntry
 {
     [BsonId]
     [JsonIgnore]

@@ -120,7 +120,7 @@
     flex-direction: column;
     gap: 0.75rem;
     width: min(28rem, 90vw);
-    max-height: 80vh;
+    height: min(30rem, 80vh);
     background: #fff;
     border-radius: 0.5rem;
     padding: 1rem 1.25rem;
@@ -146,20 +146,26 @@
     color: #3a0647;
 }
 
-.sync-history__loading,
-.sync-history__empty {
+.sync-log__loading,
+.sync-log__empty {
     color: #929292;
     font-size: 0.9rem;
 }
 
-.sync-history__list {
+.sync-log__loading {
+    flex: 1;
+}
+
+.sync-log__list {
+    flex: 1;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 0.4rem;
     overflow-y: auto;
 }
 
-.sync-history__row {
+.sync-log__row {
     display: flex;
     align-items: center;
     gap: 0.75rem;
@@ -168,53 +174,53 @@
     font-size: 0.9rem;
 }
 
-.sync-history__row--failed {
+.sync-log__row--failed {
     cursor: pointer;
 }
 
-.sync-history__row--failed .sync-history__status {
+.sync-log__row--failed .sync-log__status {
     color: #c0392b;
     font-weight: 600;
 }
 
-.sync-history__time {
+.sync-log__time {
     flex: 1;
     color: #3a0647;
 }
 
-.sync-history__status {
+.sync-log__status {
     color: #1baf7a;
     font-weight: 600;
 }
 
-.sync-history__count {
+.sync-log__count {
     color: #52514e;
     min-width: 2.5rem;
     text-align: right;
 }
 
-.sync-history__error {
+.sync-log__error {
     margin: -0.2rem 0 0.4rem;
     font-size: 0.8rem;
     color: #c0392b;
     word-break: break-word;
 }
 
-.sync-history__pager {
+.sync-log__pager {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 1rem;
 }
 
-.sync-history__pager-label {
+.sync-log__pager-label {
     font-size: 0.85rem;
     color: #52514e;
     min-width: 7rem;
     text-align: center;
 }
 
-.sync-history__pager-btn {
+.sync-log__pager-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -230,16 +236,16 @@
     transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 
-.sync-history__pager-btn:hover:not(:disabled) {
+.sync-log__pager-btn:hover:not(:disabled) {
     background-color: #f3eaf7;
     border-color: #3a0647;
 }
 
-.sync-history__pager-btn:active:not(:disabled) {
+.sync-log__pager-btn:active:not(:disabled) {
     background-color: #e6d5ee;
 }
 
-.sync-history__pager-btn:disabled {
+.sync-log__pager-btn:disabled {
     color: #c8c7c2;
     cursor: default;
 }

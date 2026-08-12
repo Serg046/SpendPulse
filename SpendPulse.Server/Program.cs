@@ -41,7 +41,7 @@ builder.Services.AddSingleton<ISettingsRepository, SettingsRepository>();
 builder.Services.AddSingleton<TransactionRepository>();
 builder.Services.AddSingleton<ITransactionRepository>(sp => sp.GetRequiredService<TransactionRepository>());
 builder.Services.AddSingleton<ISyncStatusRepository, SyncStatusRepository>();
-builder.Services.AddSingleton<ISyncHistoryRepository, SyncHistoryRepository>();
+builder.Services.AddSingleton<ISyncLogRepository, SyncLogRepository>();
 builder.Services.AddSingleton<IMerchantMappingRepository, MerchantMappingRepository>();
 builder.Services.AddSingleton<IMerchantNameExclusionRepository, MerchantNameExclusionRepository>();
 builder.Services.AddSingleton<IMerchantGroupRepository, MerchantGroupRepository>();
@@ -207,8 +207,8 @@ app.MapGet("/api/sync-status/last-data-update", async (ISyncStatusRepository rep
     await repo.GetLastDataUpdate());
 app.MapGet("/api/sync-status/is-token-expiring-soon", async (ISyncStatusRepository repo) =>
     await repo.IsTokenExpiringSoon());
-app.MapGet("/api/sync-status/history", async (int page, int pageSize, ISyncStatusRepository repo) =>
-    await repo.GetSyncHistory(page, pageSize));
+app.MapGet("/api/sync-status/log", async (int page, int pageSize, ISyncStatusRepository repo) =>
+    await repo.GetSyncLog(page, pageSize));
 app.MapPost("/api/sync-status/sync", async (ISyncStatusRepository repo) =>
     await repo.Sync())
     .RequireAuthorization(new AuthorizeAttribute

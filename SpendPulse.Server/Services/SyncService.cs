@@ -7,7 +7,7 @@ using SpendPulse.Server.Repositories;
 
 namespace SpendPulse.Server.Services;
 
-public class SyncService(IConfiguration configuration, ISettingsRepository settingsRepository, TransactionRepository transactionRepository, ISyncHistoryRepository syncHistoryRepository)
+public class SyncService(IConfiguration configuration, ISettingsRepository settingsRepository, TransactionRepository transactionRepository, ISyncLogRepository syncLogRepository)
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -57,7 +57,7 @@ public class SyncService(IConfiguration configuration, ISettingsRepository setti
 
             await settingsRepository.UpdateLastDataUpdate(DateTime.UtcNow);
 
-            await syncHistoryRepository.Add(new SyncHistoryEntry
+            await syncLogRepository.Add(new SyncLogEntry
             {
                 StartedAt = startedAt,
                 FinishedAt = DateTime.UtcNow,
@@ -67,7 +67,7 @@ public class SyncService(IConfiguration configuration, ISettingsRepository setti
         }
         catch (Exception ex)
         {
-            await syncHistoryRepository.Add(new SyncHistoryEntry
+            await syncLogRepository.Add(new SyncLogEntry
             {
                 StartedAt = startedAt,
                 FinishedAt = DateTime.UtcNow,

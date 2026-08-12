@@ -32,48 +32,48 @@
                 <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/>
             </svg>
         </button>
-        <span class="sync-status__text sync-status__text--clickable" @onclick="OpenHistoryModal">@(LastDataUpdate is null ? "" : AppTimeZone.ToDisplayTime(LastDataUpdate.Value).ToString("dd.MM.yyyy HH:mm"))</span>
+        <span class="sync-status__text sync-status__text--clickable" @onclick="OpenLogModal">@(LastDataUpdate is null ? "" : AppTimeZone.ToDisplayTime(LastDataUpdate.Value).ToString("dd.MM.yyyy HH:mm"))</span>
     </div>
 </div>
 
-@if (_showHistoryModal)
+@if (_showLogModal)
 {
-    <div class="modal-backdrop" @onclick="CloseHistoryModal">
+    <div class="modal-backdrop" @onclick="CloseLogModal">
         <div class="modal-box" @onclick:stopPropagation="true">
             <div class="modal-box__header">
-                <span>Sync history</span>
-                <button class="modal-box__close" @onclick="CloseHistoryModal" aria-label="Close">&times;</button>
+                <span>Sync log</span>
+                <button class="modal-box__close" @onclick="CloseLogModal" aria-label="Close">&times;</button>
             </div>
 
-            @if (_loadingHistory)
+            @if (_loadingLog)
             {
-                <p class="sync-history__loading">Loading...</p>
+                <p class="sync-log__loading">Loading...</p>
             }
             else
             {
-                <div class="sync-history__list">
-                    @foreach (var entry in _historyEntries)
+                <div class="sync-log__list">
+                    @foreach (var entry in _logEntries)
                     {
-                        <div class="sync-history__row @(entry.Success ? "" : "sync-history__row--failed")" @onclick="() => ToggleError(entry)">
-                            <span class="sync-history__time">@AppTimeZone.ToDisplayTime(entry.StartedAt).ToString("dd.MM.yyyy HH:mm")</span>
-                            <span class="sync-history__status">@(entry.Success ? "Success" : "Failed")</span>
-                            <span class="sync-history__count">@(entry.Success ? $"+{entry.NewTransactionCount}" : "")</span>
+                        <div class="sync-log__row @(entry.Success ? "" : "sync-log__row--failed")" @onclick="() => ToggleError(entry)">
+                            <span class="sync-log__time">@AppTimeZone.ToDisplayTime(entry.StartedAt).ToString("dd.MM.yyyy HH:mm")</span>
+                            <span class="sync-log__status">@(entry.Success ? "Success" : "Failed")</span>
+                            <span class="sync-log__count">@(entry.Success ? $"+{entry.NewTransactionCount}" : "")</span>
                         </div>
                         @if (!entry.Success && !string.IsNullOrEmpty(entry.ErrorMessage) && ReferenceEquals(_expandedEntry, entry))
                         {
-                            <div class="sync-history__error">@entry.ErrorMessage</div>
+                            <div class="sync-log__error">@entry.ErrorMessage</div>
                         }
                     }
-                    @if (_historyEntries.Count == 0)
+                    @if (_logEntries.Count == 0)
                     {
-                        <span class="sync-history__empty">No syncs recorded yet.</span>
+                        <span class="sync-log__empty">No syncs recorded yet.</span>
                     }
                 </div>
 
-                <div class="sync-history__pager">
-                    <button class="sync-history__pager-btn" @onclick="PreviousHistoryPage" disabled="@(_historyPage == 0)" aria-label="Previous page">&#8249;</button>
-                    <span class="sync-history__pager-label">Page @(_historyPage + 1) of @TotalHistoryPages</span>
-                    <button class="sync-history__pager-btn" @onclick="NextHistoryPage" disabled="@(!HasNextHistoryPage)" aria-label="Next page">&#8250;</button>
+                <div class="sync-log__pager">
+                    <button class="sync-log__pager-btn" @onclick="PreviousLogPage" disabled="@(_logPage == 0)" aria-label="Previous page">&#8249;</button>
+                    <span class="sync-log__pager-label">Page @(_logPage + 1) of @TotalLogPages</span>
+                    <button class="sync-log__pager-btn" @onclick="NextLogPage" disabled="@(!HasNextLogPage)" aria-label="Next page">&#8250;</button>
                 </div>
             }
         </div>
@@ -93,19 +93,19 @@
     [PersistentState]
     public bool IsTokenExpiringSoon { get; set; }
 
-    private const int HistoryPageSize = 10;
+    private const int LogPageSize = 10;
 
     private bool _isSyncing;
     private bool _isRefreshingToken;
-    private bool _showHistoryModal;
-    private bool _loadingHistory;
-    private int _historyPage;
-    private int _historyTotalCount;
-    private List<SyncHistoryEntry> _historyEntries = [];
-    private SyncHistoryEntry? _expandedEntry;
+    private bool _showLogModal;
+    private bool _loadingLog;
+    private int _logPage;
+    private int _logTotalCount;
+    private List<SyncLogEntry> _logEntries = [];
+    private SyncLogEntry? _expandedEntry;
 
-    private int TotalHistoryPages => Math.Max(1, (int)Math.Ceiling(_historyTotalCount / (double)HistoryPageSize));
-    private bool HasNextHistoryPage => (_historyPage + 1) * HistoryPageSize < _historyTotalCount;
+    private int TotalLogPages => Math.Max(1, (int)Math.Ceiling(_logTotalCount / (double)LogPageSize));
+    private bool HasNextLogPage => (_logPage + 1) * LogPageSize < _logTotalCount;
 
     protected override async Task OnInitializedAsync()
     {
@@ -208,38 +208,38 @@
         }
     }
 
-    private async Task OpenHistoryModal()
+    private async Task OpenLogModal()
     {
-        _showHistoryModal = true;
-        _historyPage = 0;
-        await LoadHistoryPage();
+        _showLogModal = true;
+        _logPage = 0;
+        await LoadLogPage();
     }
 
-    private void CloseHistoryModal()
+    private void CloseLogModal()
     {
-        _showHistoryModal = false;
+        _showLogModal = false;
     }
 
-    private async Task LoadHistoryPage()
+    private async Task LoadLogPage()
     {
-        _loadingHistory = true;
+        _loadingLog = true;
         _expandedEntry = null;
         StateHasChanged();
 
         try
         {
-            var page = await SyncStatusRepository.GetSyncHistory(_historyPage, HistoryPageSize);
-            _historyEntries = page.Entries;
-            _historyTotalCount = page.TotalCount;
+            var page = await SyncStatusRepository.GetSyncLog(_logPage, LogPageSize);
+            _logEntries = page.Entries;
+            _logTotalCount = page.TotalCount;
         }
         finally
         {
-            _loadingHistory = false;
+            _loadingLog = false;
             StateHasChanged();
         }
     }
 
-    private void ToggleError(SyncHistoryEntry entry)
+    private void ToggleError(SyncLogEntry entry)
     {
         if (entry.Success)
         {
@@ -249,25 +249,25 @@
         _expandedEntry = ReferenceEquals(_expandedEntry, entry) ? null : entry;
     }
 
-    private async Task PreviousHistoryPage()
+    private async Task PreviousLogPage()
     {
-        if (_historyPage == 0)
+        if (_logPage == 0)
         {
             return;
         }
 
-        _historyPage--;
-        await LoadHistoryPage();
+        _logPage--;
+        await LoadLogPage();
     }
 
-    private async Task NextHistoryPage()
+    private async Task NextLogPage()
     {
-        if (!HasNextHistoryPage)
+        if (!HasNextLogPage)
         {
             return;
         }
 
-        _historyPage++;
-        await LoadHistoryPage();
+        _logPage++;
+        await LoadLogPage();
     }
 }

@@ -42,8 +42,8 @@ public class SyncStatusApiClient(HttpClient http) : ISyncStatusRepository
         return string.IsNullOrEmpty(body) ? null : JsonSerializer.Deserialize<string>(body);
     }
 
-    public async Task<SyncHistoryPage> GetSyncHistory(int page, int pageSize)
+    public async Task<SyncLogPage> GetSyncLog(int page, int pageSize)
     {
-        return await http.GetFromJsonAsync<SyncHistoryPage>($"api/sync-status/history?page={page}&pageSize={pageSize}") ?? new SyncHistoryPage();
+        return await http.GetFromJsonAsync<SyncLogPage>($"api/sync-status/log?page={page}&pageSize={pageSize}") ?? new SyncLogPage();
     }
 }
