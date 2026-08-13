@@ -41,7 +41,9 @@
             .Where(t => !(t.CreditDebitIndicator == "CRDT" && t.EntryReference is not null))
             .GroupBy(t => t.Creditor?.Name is not null
                 ? MerchantResolution.ResolveGroupName(t.Creditor.Name, Mappings, GroupAssignments)
-                : IMerchantGroupRepository.OthersGroupName)
+                : t.EntryReference is null
+                    ? IMerchantGroupRepository.PendingGroupName
+                    : IMerchantGroupRepository.OthersGroupName)
             .Select(g => (
                 Name: g.Key,
                 Total: g.Sum(t => decimal.Parse(t.TransactionAmount.Value, CultureInfo.InvariantCulture)),

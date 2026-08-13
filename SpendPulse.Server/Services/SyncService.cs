@@ -17,7 +17,9 @@ public class SyncService(IConfiguration configuration, ISettingsRepository setti
     public async Task Sync()
     {
         var startedAt = DateTime.UtcNow;
-        var newTransactionCount = 0;
+        var settledNewCount = 0;
+        var pendingNewCount = 0;
+        var oldPendingCount = 0L;
 
         try
         {
@@ -34,7 +36,7 @@ public class SyncService(IConfiguration configuration, ISettingsRepository setti
                 {
                     if (transactions.Any())
                     {
-                        await transactionRepository.DeleteWithoutEntryReference();
+                        oldPendingCount = await transactionRepository.DeleteWithoutEntryReference();
                     }
 
                     isFirstPage = false;
@@ -50,12 +52,19 @@ public class SyncService(IConfiguration configuration, ISettingsRepository setti
                     .Where(t => t.EntryReference is null || !existingEntryReferences.Contains(t.EntryReference))
                     .ToList();
                 await transactionRepository.Save(newTransactions);
-                newTransactionCount += newTransactions.Count;
+                settledNewCount += newTransactions.Count(t => t.EntryReference is not null);
+                pendingNewCount += newTransactions.Count(t => t.EntryReference is null);
 
                 continuationKey = existingEntryReferences.Count == 0 ? nextContinuationKey : null;
             } while (continuationKey is not null);
 
             await settingsRepository.UpdateLastDataUpdate(DateTime.UtcNow);
+
+            // Pending (unbooked) transactions are always deleted and re-fetched wholesale on every
+            // sync, since the bank has no stable id for them until they settle. Re-inserting the same
+            // pending transactions isn't a real "new transaction" - only a genuine increase in the
+            // pending count (or a settled transaction) should count towards NewTransactionCount.
+            var newTransactionCount = settledNewCount + Math.Max(0, pendingNewCount - (int)oldPendingCount);
 
             await syncLogRepository.Add(new SyncLogEntry
             {
@@ -67,6 +76,8 @@ public class SyncService(IConfiguration configuration, ISettingsRepository setti
         }
         catch (Exception ex)
         {
+            var newTransactionCount = settledNewCount + Math.Max(0, pendingNewCount - (int)oldPendingCount);
+
             await syncLogRepository.Add(new SyncLogEntry
             {
                 StartedAt = startedAt,

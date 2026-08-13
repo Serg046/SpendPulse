@@ -5,6 +5,7 @@ namespace SpendPulse.Client.Repositories;
 public interface IMerchantGroupRepository
 {
     public const string OthersGroupName = "Others";
+    public const string PendingGroupName = "Pending";
 
     Task<List<string>> GetGroups();
 

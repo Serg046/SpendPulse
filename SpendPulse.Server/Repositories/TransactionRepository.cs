@@ -161,8 +161,9 @@ public class TransactionRepository(IMongoDatabase database) : ITransactionReposi
         return existing.ToHashSet()!;
     }
 
-    public async Task DeleteWithoutEntryReference()
+    public async Task<long> DeleteWithoutEntryReference()
     {
-        await _collection.DeleteManyAsync(Builders<TransactionDocument>.Filter.Eq(t => t.EntryReference, null));
+        var result = await _collection.DeleteManyAsync(Builders<TransactionDocument>.Filter.Eq(t => t.EntryReference, null));
+        return result.DeletedCount;
     }
 }
