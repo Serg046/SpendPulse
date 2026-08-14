@@ -57,7 +57,7 @@
                         <div class="sync-log__row @(entry.Success ? "" : "sync-log__row--failed")" @onclick="() => ToggleError(entry)">
                             <span class="sync-log__time">@AppTimeZone.ToDisplayTime(entry.StartedAt).ToString("dd.MM.yyyy HH:mm")</span>
                             <span class="sync-log__status">@(entry.Success ? "Success" : "Failed")</span>
-                            <span class="sync-log__count">@(entry.Success ? $"+{entry.NewTransactionCount}" : "")</span>
+                            <span class="sync-log__count">@(entry.Success ? entry.NewTransactionCount > 0 ? $"+{entry.NewTransactionCount}" : "0" : "")</span>
                         </div>
                         @if (!entry.Success && !string.IsNullOrEmpty(entry.ErrorMessage) && ReferenceEquals(_expandedEntry, entry))
                         {
