@@ -39,7 +39,10 @@
     width: 100%;
     display: flex;
     align-items: center;
-    padding: 0 0.75rem;
+    /* No left padding here - .top-row's own padding-left already provides the
+       inset, matching SyncStatus's username text so both align to the same
+       left offset from the screen edge. */
+    padding: 0 0.75rem 0 0;
 }
 
 .navbar-brand {
