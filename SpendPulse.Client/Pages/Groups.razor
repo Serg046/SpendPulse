@@ -251,13 +251,17 @@
 
     private async Task Drop(string groupName)
     {
-        if (!_isAdmin || _draggedMerchant is null)
+        // Capture into a local: the browser fires dragend on the source element right after
+        // drop, which calls DragEnd() and clears _draggedMerchant - and since SetAssignment
+        // below is awaited, that race can null the field out before this method resumes.
+        var merchant = _draggedMerchant;
+        if (!_isAdmin || merchant is null)
         {
             return;
         }
 
-        await MerchantGroupRepository.SetAssignment(_draggedMerchant, groupName);
-        _assignments[_draggedMerchant] = groupName;
+        await MerchantGroupRepository.SetAssignment(merchant, groupName);
+        _assignments[merchant] = groupName;
         _draggedMerchant = null;
     }
 
