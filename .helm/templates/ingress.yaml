@@ -7,10 +7,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - spendpulse.is-local.org
+    - budget.serg046.it
     secretName: spendpulse-tls
   rules:
-  - host: spendpulse.is-local.org
+  - host: budget.serg046.it
     http:
       paths:
       - path: /
