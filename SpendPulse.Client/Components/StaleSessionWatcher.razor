@@ -15,6 +15,9 @@
 
     private const string VisibilityModuleSource = """
         export function watchVisibility(dotnetHelper) {
+            if (!window.matchMedia('(max-width: 640px)').matches) {
+                return;
+            }
             document.addEventListener('visibilitychange', () => {
                 dotnetHelper.invokeMethodAsync('OnVisibilityChanged', document.visibilityState);
             });
