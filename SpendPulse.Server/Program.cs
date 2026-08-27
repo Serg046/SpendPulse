@@ -48,6 +48,7 @@ builder.Services.AddSingleton<IMerchantGroupRepository, MerchantGroupRepository>
 builder.Services.AddSingleton<ITrendMonthExclusionRepository, TrendMonthExclusionRepository>();
 builder.Services.AddSingleton<SyncService>();
 builder.Services.AddScoped<SyncStatusState>();
+builder.Services.AddScoped<MerchantMappingState>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

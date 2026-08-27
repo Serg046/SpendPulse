@@ -18,5 +18,6 @@ builder.Services.AddScoped<IMerchantNameExclusionRepository, MerchantNameExclusi
 builder.Services.AddScoped<IMerchantGroupRepository, MerchantGroupApiClient>();
 builder.Services.AddScoped<ITrendMonthExclusionRepository, TrendMonthExclusionApiClient>();
 builder.Services.AddScoped<SyncStatusState>();
+builder.Services.AddScoped<MerchantMappingState>();
 
 await builder.Build().RunAsync();

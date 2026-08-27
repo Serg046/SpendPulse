@@ -1,12 +1,13 @@
 @page "/merchants"
 @rendermode InteractiveWebAssembly
-@using System.Text.RegularExpressions
 @using SpendPulse.Client.Models
 @using SpendPulse.Client.Repositories
+@using SpendPulse.Client.Services
 @inject ITransactionRepository TransactionRepository
 @inject IMerchantMappingRepository MerchantMappingRepository
 @inject IMerchantNameExclusionRepository MerchantNameExclusionRepository
 @inject ISyncStatusRepository SyncStatusRepository
+@inject MerchantMappingState MerchantMappingState
 
 <div class="merchants-toolbar">
     <button class="merchants-toolbar__button" @onclick="OpenExclusionsModal" disabled="@(!_isAdmin)">Ignorings (@_exclusions.Count(e => e.MerchantName is null))</button>
@@ -140,8 +141,6 @@
 }
 
 @code {
-    private static readonly Regex DigitsOnly = new(@"^\d+$", RegexOptions.Compiled);
-
     [PersistentState]
     public List<string>? MerchantNames { get; set; }
 
@@ -260,6 +259,7 @@
         _filterText = string.Empty;
         _mappingError = null;
         RecomputeSimilarGroups();
+        MerchantMappingState.NotifyChanged();
     }
 
     private async Task SwapMapping()
@@ -287,6 +287,7 @@
         _filterText = string.Empty;
         _mappingError = null;
         RecomputeSimilarGroups();
+        MerchantMappingState.NotifyChanged();
     }
 
     private async Task AddExclusion()
@@ -301,6 +302,7 @@
         _exclusions.Add(new MerchantNameExclusion { Word = word });
         _newExclusionWord = string.Empty;
         RecomputeSimilarGroups();
+        MerchantMappingState.NotifyChanged();
     }
 
     private async Task RemoveExclusion(string word)
@@ -308,6 +310,7 @@
         await MerchantNameExclusionRepository.Remove(word);
         _exclusions.RemoveAll(e => e.MerchantName is null && string.Equals(e.Word, word, StringComparison.OrdinalIgnoreCase));
         RecomputeSimilarGroups();
+        MerchantMappingState.NotifyChanged();
     }
 
     private async Task OnExclusionInputKeyDown(KeyboardEventArgs e)
@@ -331,6 +334,7 @@
         _exclusions.Add(new MerchantNameExclusion { Word = word, MerchantName = _selectedName });
         _newMerchantExclusionWord = string.Empty;
         RecomputeSimilarGroups();
+        MerchantMappingState.NotifyChanged();
     }
 
     private async Task RemoveMerchantExclusion(string word)
@@ -343,6 +347,7 @@
         await MerchantNameExclusionRepository.Remove(word, _selectedName);
         _exclusions.RemoveAll(e => string.Equals(e.MerchantName, _selectedName, StringComparison.OrdinalIgnoreCase) && string.Equals(e.Word, word, StringComparison.OrdinalIgnoreCase));
         RecomputeSimilarGroups();
+        MerchantMappingState.NotifyChanged();
     }
 
     private async Task OnMerchantExclusionInputKeyDown(KeyboardEventArgs e)
@@ -353,44 +358,9 @@
         }
     }
 
-    private HashSet<string> GetSignificantWords(string name)
-    {
-        var excludedWords = _exclusions
-            .Where(e => e.MerchantName is null || string.Equals(e.MerchantName, name, StringComparison.OrdinalIgnoreCase))
-            .Select(e => e.Word)
-            .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-        return name
-            .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)
-            .Where(word => !DigitsOnly.IsMatch(word))
-            .Where(word => !excludedWords.Contains(word))
-            .Select(word => word.ToUpperInvariant())
-            .ToHashSet();
-    }
-
     private void RecomputeSimilarGroups()
     {
-        _similarCandidates = new Dictionary<string, List<string>>();
-
-        var unmapped = (MerchantNames ?? []).Where(name => !_mappings.ContainsKey(name)).ToList();
-        var wordsByName = unmapped.ToDictionary(name => name, GetSignificantWords);
-
-        foreach (var name in unmapped)
-        {
-            var words = wordsByName[name];
-            if (words.Count == 0)
-            {
-                continue;
-            }
-
-            var candidates = unmapped
-                .Where(other => other != name && wordsByName[other].Overlaps(words))
-                .ToList();
-
-            if (candidates.Count > 0)
-            {
-                _similarCandidates[name] = candidates;
-            }
-        }
+        _similarCandidates = MerchantSimilarityMatcher.ComputeSimilarGroups(
+            MerchantNames ?? [], _mappings.Keys.ToHashSet(), _exclusions);
     }
 }
