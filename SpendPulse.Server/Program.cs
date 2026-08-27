@@ -139,14 +139,14 @@ app.MapPost("/api/merchant-mappings/remove", async ([FromBody] string mappedFrom
 }).RequireAuthorization(new AuthorizeAttribute { Roles = "Admin" });
 app.MapGet("/api/merchant-name-exclusions", async (IMerchantNameExclusionRepository repo) =>
     await repo.GetAll());
-app.MapPost("/api/merchant-name-exclusions", async ([FromBody] string word, IMerchantNameExclusionRepository repo) =>
+app.MapPost("/api/merchant-name-exclusions", async ([FromBody] string word, string? merchantName, IMerchantNameExclusionRepository repo) =>
 {
-    await repo.Add(word);
+    await repo.Add(word, merchantName);
     return Results.Ok();
 }).RequireAuthorization(new AuthorizeAttribute { Roles = "Admin" });
-app.MapPost("/api/merchant-name-exclusions/remove", async ([FromBody] string word, IMerchantNameExclusionRepository repo) =>
+app.MapPost("/api/merchant-name-exclusions/remove", async ([FromBody] string word, string? merchantName, IMerchantNameExclusionRepository repo) =>
 {
-    await repo.Remove(word);
+    await repo.Remove(word, merchantName);
     return Results.Ok();
 }).RequireAuthorization(new AuthorizeAttribute { Roles = "Admin" });
 app.MapGet("/api/trend-month-exclusions", async (ITrendMonthExclusionRepository repo) =>

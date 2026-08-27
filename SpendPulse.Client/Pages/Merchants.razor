@@ -9,7 +9,7 @@
 @inject ISyncStatusRepository SyncStatusRepository
 
 <div class="merchants-toolbar">
-    <button class="merchants-toolbar__button" @onclick="OpenExclusionsModal" disabled="@(!_isAdmin)">Ignorings (@_exclusions.Count)</button>
+    <button class="merchants-toolbar__button" @onclick="OpenExclusionsModal" disabled="@(!_isAdmin)">Ignorings (@_exclusions.Count(e => e.MerchantName is null))</button>
 </div>
 
 <ul class="merchants-list">
@@ -40,7 +40,7 @@
             </div>
 
             <div class="merchants-exclusions__chips">
-                @foreach (var word in _exclusions)
+                @foreach (var word in _exclusions.Where(e => e.MerchantName is null).Select(e => e.Word))
                 {
                     <span class="merchants-exclusions__chip">
                         @word
@@ -103,6 +103,25 @@
                 </div>
             }
 
+            <div class="merchants-modal__ignorings">
+                <span class="merchants-modal__ignorings-label">Ignore word for this merchant:</span>
+                <div class="merchants-exclusions__chips">
+                    @foreach (var word in _exclusions.Where(e => string.Equals(e.MerchantName, _selectedName, StringComparison.OrdinalIgnoreCase)).Select(e => e.Word))
+                    {
+                        <span class="merchants-exclusions__chip">
+                            @word
+                            <button class="merchants-exclusions__remove" @onclick="() => RemoveMerchantExclusion(word)" aria-label="Remove @word">&times;</button>
+                        </span>
+                    }
+                </div>
+                <div class="merchants-exclusions__add-row">
+                    <input class="merchants-exclusions__input" placeholder="Add word..." value="@_newMerchantExclusionWord"
+                           @oninput="e => _newMerchantExclusionWord = (string?)e.Value ?? string.Empty"
+                           @onkeydown="OnMerchantExclusionInputKeyDown"/>
+                    <button class="merchants-exclusions__add" @onclick="AddMerchantExclusion">Add</button>
+                </div>
+            </div>
+
             @if (_mappingError is not null)
             {
                 <div class="merchants-modal__error">@_mappingError</div>
@@ -130,18 +149,19 @@
     public List<MerchantMapping>? Mappings { get; set; }
 
     [PersistentState]
-    public List<string>? Exclusions { get; set; }
+    public List<MerchantNameExclusion>? Exclusions { get; set; }
 
     [PersistentState]
     public bool? IsAdmin { get; set; }
 
     private bool _isAdmin;
     private Dictionary<string, string> _mappings = new();
-    private List<string> _exclusions = [];
+    private List<MerchantNameExclusion> _exclusions = [];
     private Dictionary<string, List<string>> _similarCandidates = new();
     private string? _selectedName;
     private string _filterText = string.Empty;
     private string _newExclusionWord = string.Empty;
+    private string _newMerchantExclusionWord = string.Empty;
     private string? _mappingError;
     private bool _showExclusionsModal;
 
@@ -176,6 +196,7 @@
 
         _selectedName = name;
         _filterText = string.Empty;
+        _newMerchantExclusionWord = string.Empty;
         _mappingError = null;
     }
 
@@ -183,6 +204,7 @@
     {
         _selectedName = null;
         _filterText = string.Empty;
+        _newMerchantExclusionWord = string.Empty;
         _mappingError = null;
     }
 
@@ -270,13 +292,13 @@
     private async Task AddExclusion()
     {
         var word = _newExclusionWord.Trim();
-        if (word.Length == 0 || _exclusions.Contains(word, StringComparer.OrdinalIgnoreCase))
+        if (word.Length == 0 || _exclusions.Any(e => e.MerchantName is null && string.Equals(e.Word, word, StringComparison.OrdinalIgnoreCase)))
         {
             return;
         }
 
         await MerchantNameExclusionRepository.Add(word);
-        _exclusions.Add(word);
+        _exclusions.Add(new MerchantNameExclusion { Word = word });
         _newExclusionWord = string.Empty;
         RecomputeSimilarGroups();
     }
@@ -284,7 +306,7 @@
     private async Task RemoveExclusion(string word)
     {
         await MerchantNameExclusionRepository.Remove(word);
-        _exclusions.RemoveAll(w => string.Equals(w, word, StringComparison.OrdinalIgnoreCase));
+        _exclusions.RemoveAll(e => e.MerchantName is null && string.Equals(e.Word, word, StringComparison.OrdinalIgnoreCase));
         RecomputeSimilarGroups();
     }
 
@@ -296,12 +318,52 @@
         }
     }
 
+    private async Task AddMerchantExclusion()
+    {
+        var word = _newMerchantExclusionWord.Trim();
+        if (word.Length == 0 || _selectedName is null ||
+            _exclusions.Any(e => string.Equals(e.MerchantName, _selectedName, StringComparison.OrdinalIgnoreCase) && string.Equals(e.Word, word, StringComparison.OrdinalIgnoreCase)))
+        {
+            return;
+        }
+
+        await MerchantNameExclusionRepository.Add(word, _selectedName);
+        _exclusions.Add(new MerchantNameExclusion { Word = word, MerchantName = _selectedName });
+        _newMerchantExclusionWord = string.Empty;
+        RecomputeSimilarGroups();
+    }
+
+    private async Task RemoveMerchantExclusion(string word)
+    {
+        if (_selectedName is null)
+        {
+            return;
+        }
+
+        await MerchantNameExclusionRepository.Remove(word, _selectedName);
+        _exclusions.RemoveAll(e => string.Equals(e.MerchantName, _selectedName, StringComparison.OrdinalIgnoreCase) && string.Equals(e.Word, word, StringComparison.OrdinalIgnoreCase));
+        RecomputeSimilarGroups();
+    }
+
+    private async Task OnMerchantExclusionInputKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await AddMerchantExclusion();
+        }
+    }
+
     private HashSet<string> GetSignificantWords(string name)
     {
+        var excludedWords = _exclusions
+            .Where(e => e.MerchantName is null || string.Equals(e.MerchantName, name, StringComparison.OrdinalIgnoreCase))
+            .Select(e => e.Word)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
         return name
             .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)
             .Where(word => !DigitsOnly.IsMatch(word))
-            .Where(word => !_exclusions.Contains(word, StringComparer.OrdinalIgnoreCase))
+            .Where(word => !excludedWords.Contains(word))
             .Select(word => word.ToUpperInvariant())
             .ToHashSet();
     }

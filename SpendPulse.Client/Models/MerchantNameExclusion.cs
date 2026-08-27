@@ -12,4 +12,7 @@ public class MerchantNameExclusion
 
     [BsonElement("word")]
     public string Word { get; set; } = string.Empty;
+
+    [BsonElement("merchantName")]
+    public string? MerchantName { get; set; }
 }

@@ -1,10 +1,12 @@
+using SpendPulse.Client.Models;
+
 namespace SpendPulse.Client.Repositories;
 
 public interface IMerchantNameExclusionRepository
 {
-    Task<List<string>> GetAll();
+    Task<List<MerchantNameExclusion>> GetAll();
 
-    Task Add(string word);
+    Task Add(string word, string? merchantName = null);
 
-    Task Remove(string word);
+    Task Remove(string word, string? merchantName = null);
 }

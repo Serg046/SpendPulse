@@ -9,22 +9,26 @@ public class MerchantNameExclusionRepository(IMongoDatabase database) : IMerchan
     private readonly IMongoCollection<MerchantNameExclusion> _collection =
         database.GetCollection<MerchantNameExclusion>("merchantNameExclusions");
 
-    public async Task<List<string>> GetAll()
+    public async Task<List<MerchantNameExclusion>> GetAll()
     {
-        var exclusions = await _collection.Find(FilterDefinition<MerchantNameExclusion>.Empty).ToListAsync();
-        return exclusions.Select(e => e.Word).ToList();
+        return await _collection.Find(FilterDefinition<MerchantNameExclusion>.Empty).ToListAsync();
     }
 
-    public async Task Add(string word)
+    public async Task Add(string word, string? merchantName = null)
     {
-        var filter = Builders<MerchantNameExclusion>.Filter.Eq(e => e.Word, word);
-        var update = Builders<MerchantNameExclusion>.Update.Set(e => e.Word, word);
+        var filter = Builders<MerchantNameExclusion>.Filter.Eq(e => e.Word, word) &
+                     Builders<MerchantNameExclusion>.Filter.Eq(e => e.MerchantName, merchantName);
+        var update = Builders<MerchantNameExclusion>.Update
+            .Set(e => e.Word, word)
+            .Set(e => e.MerchantName, merchantName);
 
         await _collection.UpdateOneAsync(filter, update, new UpdateOptions { IsUpsert = true });
     }
 
-    public async Task Remove(string word)
+    public async Task Remove(string word, string? merchantName = null)
     {
-        await _collection.DeleteOneAsync(Builders<MerchantNameExclusion>.Filter.Eq(e => e.Word, word));
+        var filter = Builders<MerchantNameExclusion>.Filter.Eq(e => e.Word, word) &
+                     Builders<MerchantNameExclusion>.Filter.Eq(e => e.MerchantName, merchantName);
+        await _collection.DeleteOneAsync(filter);
     }
 }
